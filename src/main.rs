@@ -1,34 +1,31 @@
-use maud::html;
-use rocket::response::content::Html;
-use rocket::form::Form;
+use maud::{html, Markup};
 
-#[macro_use] extern crate rocket;
+use axum::{
+    routing::get,
+    Router, response::Html,
+};
 
-#[get("/")]
-fn index() -> Html<String> {
-    let name = "charles";
-    let markup = html! {
-        h1 { "Hi, " (name) "!" }
-    };
-    Html(markup.into_string())
+#[tokio::main]
+async fn main() {
+    // build our application with a single route
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, World!" }))
+        .route("/tally", get(tally).post(tally));
+
+    // run it with hyper on localhost:3000
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
 
-static mut COUNT: i32 = 0;
 
-#[derive(FromForm)]
 struct Args {
     addx: Option<String>,
     subx: Option<String>
 }
 
-#[get("/tally")]
-fn tally_get() -> Html<String> {
-    tally(None)
-}
-
-#[post("/tally", data = "<args>")]
-fn tally(args: Option<Form<Args>>) -> Html<String> {
-
+async fn tally() -> Html<String> {
     let markup = html! {
         body {
             h1 { "Tally" }
@@ -38,10 +35,5 @@ fn tally(args: Option<Form<Args>>) -> Html<String> {
         }
     };
     Html(markup.into_string())
-
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, tally, tally_get])
-}
