@@ -1,19 +1,23 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
+#[macro_use]
+extern crate rocket;
 use maud::{html, Markup, DOCTYPE};
-use rocket::{response::content::Html, form::Form};
+use rocket::{request::Form, response::content::Html};
 
-#[macro_use] extern crate rocket;
+pub type Session<'a> = rocket_session::Session<'a, i32>;
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![tally, tally_get])
+fn main() -> () {
+    rocket::ignite()
+        .attach(Session::fairing())
+        .mount("/", routes![tally, tally_get])
+        .launch();
 }
-
-static mut COUNT: i32 = 0;
 
 #[derive(FromForm)]
 struct Args {
     addx: Option<String>,
-    subx: Option<String>
+    subx: Option<String>,
 }
 
 fn natural_number_list(end: i32) -> Markup {
@@ -28,42 +32,39 @@ fn natural_number_list(end: i32) -> Markup {
 }
 
 #[get("/tally")]
-fn tally_get() -> Html<String> {
-    tally(None)
+fn tally_get(session: Session) -> Html<String> {
+    tally(None, session)
 }
 
 #[post("/tally", data = "<args>")]
-fn tally(args: Option<Form<Args>>) -> Html<String> {
+fn tally(args: Option<Form<Args>>, session: Session) -> Html<String> {
     if let Some(args) = args {
         if let Some(addx) = &args.addx {
             if !addx.is_empty() {
-                unsafe {
-                    COUNT = COUNT + 1;
-                }
+                session.tap(|n| {
+                    *n += 1;
+                });
             }
         }
         if let Some(subx) = &args.subx {
             if !subx.is_empty() {
-                unsafe {
-                    COUNT = COUNT - 1;
-                }
+                session.tap(|n| {
+                    *n -= 1;
+                });
             }
-        } 
+        }
     }
-    unsafe {
-        let count = COUNT.to_string();
-        let markup = html! {
-            (DOCTYPE)
-            head {}
-            body {
-                h1 { "Tally" }
-                button onclick="rr(this)" action="addx" { "+" }
-                button onclick="rr(this)" action="subx" { "-" }
-                (natural_number_list(COUNT))
-            }
-        };
-        Html(markup.into_string())
-    }
+    let count = session.tap(|n| *n);
 
+    let markup = html! {
+        (DOCTYPE)
+        head {}
+        body {
+            h1 { "Tally" }
+            button onclick="rr(this)" action="addx" { "+" }
+            button onclick="rr(this)" action="subx" { "-" }
+            (natural_number_list(count))
+        }
+    };
+    Html(markup.into_string())
 }
-
