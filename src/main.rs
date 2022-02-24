@@ -1,27 +1,16 @@
 use maud::{html, Markup, DOCTYPE};
+use rocket::{response::content::Html, form::Form};
 
-use axum::{
-    routing::get,
-    Router, response::Html, extract::Form,
-};
-use serde::Deserialize;
+#[macro_use] extern crate rocket;
+
+#[launch]
+fn rocket() -> _ {
+    rocket::build().mount("/", routes![tally, tally_get])
+}
 
 static mut COUNT: i32 = 0;
 
-#[tokio::main]
-async fn main() {
-    // build our application with a single route
-    let app = Router::new()
-        .route("/tally", get(tally).post(tally));
-
-    // run it with hyper on localhost:3000
-    axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
-}
-
-#[derive(Deserialize)]
+#[derive(FromForm)]
 struct Args {
     addx: Option<String>,
     subx: Option<String>
@@ -38,17 +27,22 @@ fn natural_number_list(end: i32) -> Markup {
     }
 }
 
-async fn tally(form: Option<Form<Args>>) -> Html<String> {
-    if let Some(form) = form {
-        let args = form.0;
-        if let Some(addx) = args.addx {
+#[get("/tally")]
+fn tally_get() -> Html<String> {
+    tally(None)
+}
+
+#[post("/tally", data = "<args>")]
+fn tally(args: Option<Form<Args>>) -> Html<String> {
+    if let Some(args) = args {
+        if let Some(addx) = &args.addx {
             if !addx.is_empty() {
                 unsafe {
                     COUNT = COUNT + 1;
                 }
             }
         }
-        if let Some(subx) = args.subx {
+        if let Some(subx) = &args.subx {
             if !subx.is_empty() {
                 unsafe {
                     COUNT = COUNT - 1;
