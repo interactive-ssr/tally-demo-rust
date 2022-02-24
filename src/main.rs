@@ -49,7 +49,9 @@ fn tally(args: Option<Form<Args>>, session: Session) -> Html<String> {
         if let Some(subx) = &args.subx {
             if !subx.is_empty() {
                 session.tap(|n| {
-                    *n -= 1;
+                    if *n >= 1 {
+                        *n -= 1;
+                    }
                 });
             }
         }
