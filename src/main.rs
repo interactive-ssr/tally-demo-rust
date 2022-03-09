@@ -60,12 +60,14 @@ fn tally(args: Option<Form<Args>>, session: Session) -> Html<String> {
 
     let markup = html! {
         (DOCTYPE)
-        head {}
-        body {
-            h1 { "Tally" }
-            button onclick="rr(this)" action="addx" { "+" }
-            button onclick="rr(this)" action="subx" { "-" }
-            (natural_number_list(count))
+        html {
+            head {}
+            body {
+                h1 { "Tally" }
+                button onclick="rr(this)" action="addx" { "+" }
+                button onclick="rr(this)" action="subx" { "-" }
+                (natural_number_list(count))
+            }
         }
     };
     Html(markup.into_string())
