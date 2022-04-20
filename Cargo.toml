@@ -7,6 +7,9 @@ edition = "2021"
 
 [dependencies]
 maud = {version = "0.23.0", features = ["axum"]}
-axum = "0.4.6"
+axum = "0.4.8"
+rustls = "0.20.4"
+axum_database_sessions = {version = "0.2.3" }
 tokio = {version = "1.17.0", features = ["full"]}
+tower-cookies = "0.5.1"
 serde = {version = "1.0.136", features = ["derive"]}
