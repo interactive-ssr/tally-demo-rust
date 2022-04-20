@@ -1,8 +1,8 @@
-# ISSR - Rust Tally Demo (Rocket)
+# ISSR - Rust Tally Demo 
 
 Interactive SSR (ISSR) is a WebSocket-based framework that allows you to write a declarative HTTP server in any language and have the client sync state automatically. See the [main readme](https://github.com/interactive-ssr/issr-server/blob/master/main.org) for more information.
 
-This is the example project for how to use ISSR with the Rust web framework [Rocket](https://rocket.rs/).
+This is the example project for how to use ISSR with the Rust web framework [Rocket](https://rocket.rs/). For an example with the [Axum](https://github.com/tokio-rs/axum) web framework, checkout the `axum` branch.
 
 ## Quickstart
 
@@ -10,8 +10,10 @@ This is the example project for how to use ISSR with the Rust web framework [Roc
 # Clone the repository
 $ git clone https://github.com/interactive-ssr/tally-demo-rust
 
+# The default branch uses Rocket. For Axum, checkout the axum branch:
+git checkout axum
 
-# Start the Rocket server. This server will only be accessed internally by the ISSR server.
+# Start the Rocket or Axum server. This server will only be accessed internally by the ISSR server.
 $ cd tally-demo-rust
 $ cargo r
 
